@@ -1,5 +1,6 @@
 pub mod time;
 
+/// All widgets HAVE to implement this trait
 pub trait Widget {
     fn name(&self) -> String;
     // The text that will be shown on the status bar

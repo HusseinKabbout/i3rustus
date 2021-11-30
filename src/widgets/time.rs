@@ -23,8 +23,11 @@ impl Widget for Time {
     }
 
     fn to_json(&self) -> String {
+        // full_text is defined by i3 and is the display_text
+        // Name is not defined by i3 and is only used to know which
+        // config belongs to which widget
         format!(
-            "{{ \"currentTime\": \"{}\", \"name\": \"{}\" }}",
+            "{{ \"full_text\": \"{}\", \"name\": \"{}\" }}",
             self.display_text(),
             self.name()
         )

@@ -1,6 +1,7 @@
 mod utils;
 mod widgets;
 
+use std::{thread, time};
 use serde_json::{ Value, json };
 use utils::json::jsonify;
 use utils::logger::Logger;
@@ -11,21 +12,24 @@ use log::{ LevelFilter };
 static LOGGER: Logger = Logger;
 
 struct I3Config {
-    // This is currently not used in the code,
-    // but i3 needs it to be in the json
-    #[allow(dead_code)]
     version: u8,
     widgets: Vec<Box<dyn Widget>>
 }
 
 impl I3Config {
 
-    fn to_json(&self) -> Value {
-        let mut json: Value = json!({});
+    fn version(&self) -> u8 {
+        return self.version;
+    }
+
+    fn widgets_config(&self) -> Value {
+        let mut config: Value = json!([]);
 
         for widget in self.widgets.iter() {
+            let widget_config: Value;
+
             match jsonify::<String>(&widget.to_json()) {
-                Ok(display_text) => json[widget.name()] = display_text,
+                Ok(conf) => widget_config = conf,
                 Err(error) => {
                     LOGGER.warning(
                         &format!("Invalid config for {}: \n\t{}", widget.name(), error),
@@ -34,9 +38,11 @@ impl I3Config {
                 }
             }
 
+            // Is it OK to do an unwrap here?
+            config.as_array_mut().unwrap().push(widget_config);
         }
 
-        return json;
+        return config;
     }
 }
 
@@ -48,23 +54,25 @@ fn main() {
         _ => {}
     }
 
-    let final_config = I3Config{
+    let final_config = I3Config {
         version: 1,
         widgets: vec![
             Box::new(Time {})
         ]
     };
 
-    let config_json = final_config.to_json();
-
-    if config_json != json!({}) {
-        LOGGER.info(
-            &format!("Active config: {}", config_json),
-            &file!());
-    } else {
-        LOGGER.error(
-            "Error trying to load config!",
-            &file!());
+    // This is ugly and should be moved out of the main
+    // This is the output that is read by i3
+    println!("{}", json!({"version": final_config.version()}));
+    // Begin endless array
+    println!("[");
+    // REMOVE ME: This is used to make the output simpler, but is ugly
+    // Arrays have to be separated by comma in output
+    println!("[]");
+    loop {
+        // The actual config for the status bar
+        println!(",{}", final_config.widgets_config());
+        // Wait 2 secs before printing update
+        thread::sleep(time::Duration::from_secs(1));
     }
-
 }

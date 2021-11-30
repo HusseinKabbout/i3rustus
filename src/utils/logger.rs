@@ -1,5 +1,5 @@
 // Inspired by from https://docs.rs/log/latest/log/
-use log::{Record, Level, Metadata, Log};
+use log::{ Record, Level, Metadata, Log };
 
 pub struct Logger;
 

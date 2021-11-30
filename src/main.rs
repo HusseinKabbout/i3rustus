@@ -1,12 +1,12 @@
 mod utils;
 mod widgets;
 
-use serde_json::{Value, json};
+use serde_json::{ Value, json };
 use utils::json::jsonify;
 use utils::logger::Logger;
 use widgets::time::Time;
-use widgets::{Widget};
-use log::{LevelFilter};
+use widgets::{ Widget };
+use log::{ LevelFilter };
 
 static LOGGER: Logger = Logger;
 

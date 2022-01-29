@@ -27,8 +27,10 @@ impl I3Config {
 
         for widget in self.widgets.iter() {
             let widget_config: Value;
-
-            match jsonify::<String>(&widget.to_json()) {
+            // The brackets for widget.to_json were added
+            // to indicate that we are getting a ref from the
+            // result of `to_json` and not the widget itself
+            match jsonify::<String>(&(widget.to_json())) {
                 Ok(conf) => widget_config = conf,
                 Err(error) => {
                     LOGGER.warning(
@@ -43,6 +45,22 @@ impl I3Config {
         }
 
         return config;
+    }
+
+    fn init(&self) {
+        // This is the output that is read by i3
+        println!("{}", json!({"version": self.version()}));
+        // Begin endless array
+        println!("[");
+        // REMOVE ME: This is used to make the output simpler, but is ugly
+        // Arrays have to be separated by comma in output
+        println!("[]");
+        loop {
+            // The actual config for the status bar
+            println!(",{}", self.widgets_config());
+            // Wait 1 secs before printing update
+            thread::sleep(time::Duration::from_secs(1));
+        }
     }
 }
 
@@ -61,18 +79,5 @@ fn main() {
         ]
     };
 
-    // This is ugly and should be moved out of the main
-    // This is the output that is read by i3
-    println!("{}", json!({"version": final_config.version()}));
-    // Begin endless array
-    println!("[");
-    // REMOVE ME: This is used to make the output simpler, but is ugly
-    // Arrays have to be separated by comma in output
-    println!("[]");
-    loop {
-        // The actual config for the status bar
-        println!(",{}", final_config.widgets_config());
-        // Wait 2 secs before printing update
-        thread::sleep(time::Duration::from_secs(1));
-    }
+    final_config.init();
 }

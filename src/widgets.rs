@@ -1,4 +1,5 @@
 pub mod time;
+pub mod disk_stats;
 
 /// All widgets HAVE to implement this trait
 pub trait Widget {

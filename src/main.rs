@@ -3,9 +3,12 @@ mod widgets;
 
 use std::{thread, time};
 use serde_json::{ Value, json };
+use std::collections::HashMap;
+
 use utils::json::jsonify;
 use utils::logger::Logger;
 use widgets::time::Time;
+use widgets::disk_stats::Disk;
 use widgets::{ Widget };
 use log::{ LevelFilter };
 
@@ -75,6 +78,11 @@ fn main() {
     let final_config = I3Config {
         version: 1,
         widgets: vec![
+            Box::new(Disk {
+                paths_to_watch: HashMap::from([
+                    ("root", "/")
+                ])
+            }),
             Box::new(Time {})
         ]
     };

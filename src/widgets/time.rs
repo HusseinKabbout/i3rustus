@@ -1,7 +1,7 @@
 use chrono::Utc;
 use chrono::DateTime;
 
-use super::Widget;
+use crate::widgets::Widget;
 
 // Why does this "#[derive(Copy, Clone)]" not fix the error:
 // error[E0507]: cannot move out of `**widget` which is behind a shared reference

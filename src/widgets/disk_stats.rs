@@ -5,7 +5,7 @@ use std::mem;
 use std::path::Path;
 
 use crate::utils::macros::cast_to_u64;
-use super::Widget;
+use crate::widgets::Widget;
 
 /// A struct that holds a Map of all paths that we want to watch over
 pub struct Disk<'a> {

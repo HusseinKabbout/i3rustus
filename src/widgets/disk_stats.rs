@@ -14,8 +14,8 @@ pub struct Disk<'a> {
 
 impl<'a> Widget for Disk<'a> {
 
-    fn name(&self) -> String {
-        return String::from("disk")
+    fn name(&self) -> &str {
+        "disk"
     }
 
     fn display_text(&self) -> String {

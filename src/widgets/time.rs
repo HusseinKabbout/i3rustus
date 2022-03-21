@@ -13,8 +13,8 @@ pub struct Time { }
 
 impl Widget for Time {
 
-    fn name(&self) -> String {
-        String::from("time")
+    fn name(&self) -> &str {
+        "time"
     }
 
     fn display_text(&self) -> String {

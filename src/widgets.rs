@@ -3,7 +3,9 @@ pub mod disk_stats;
 
 /// All widgets HAVE to implement this trait
 pub trait Widget {
-    fn name(&self) -> String;
+    // Name is a &str because we know at compile time how big the string will be
+    // so we don't need to use String
+    fn name(&self) -> &str;
     // The text that will be shown on the status bar
     fn display_text(&self) -> String;
     // JSON representation of the widget

@@ -11,6 +11,7 @@ use widgets::time::Time;
 use widgets::disk_stats::Disk;
 use widgets::{ Widget };
 use log::{ LevelFilter };
+use widgets::memory_stats::MemoryUsage;
 
 static LOGGER: Logger = Logger;
 
@@ -78,6 +79,7 @@ fn main() {
     let final_config = I3Config {
         version: 1,
         widgets: vec![
+            Box::new(MemoryUsage {}),
             Box::new(Disk {
                 paths_to_watch: HashMap::from([
                     ("root", "/")

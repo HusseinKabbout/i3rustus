@@ -1,10 +1,8 @@
 use std::fs;
 use std::collections::HashMap;
-use libc::statvfs;
-use std::mem;
+use std::io::Error;
 use std::path::Path;
 
-use crate::utils::macros::cast_to_u64;
 use crate::widgets::Widget;
 
 /// A struct that holds a Map of all paths that we want to watch over
@@ -14,34 +12,22 @@ pub struct Disk<'a> {
 
 impl<'a> Disk<'a> {
 
-    /// Calculate the available disk storage for a specific path
-    /// Source: https://github.com/GuillaumeGomez/sysinfo/blob/master/src/linux/disk.rs#L61
-    fn calulcate_available_disk_storage(&self, path: &str) -> u64{
-        unsafe {
-            let mut available_space: u64 = 0;
-            let mut stat: statvfs = mem::zeroed();
-            // convert a path to a NUL-terminated Vec<u8> suitable for use with C functions
-            let path_in_c = self.to_cpath(Path::new(path));
+    fn calulcate_available_disk_storage(&self, path: &Path) -> Result<u64, Error> {
+        let mut directory_size = 0;
 
-            if statvfs(path_in_c.as_ptr() as *const _, &mut stat) == 0 {
-                let tmp = cast_to_u64!(stat.f_bsize) * cast_to_u64!(stat.f_bavail);
-                available_space = cast_to_u64!(tmp);
+        if path.is_dir() {
+            for directory_entry in fs::read_dir(path)? {
+                let directory_entry_path = directory_entry?.path();
+                directory_size += directory_entry_path.metadata()?.len();
+                if directory_entry_path.is_dir() {
+                    directory_size += self.calulcate_available_disk_storage(&directory_entry_path)?;
+                }
             }
-            // Convert bytes to GiB
-            available_space / 1024 / 1024 / 1024
+        } else {
+            directory_size = path.metadata()?.len();
         }
-    }
 
-    /// This function transforms a rust string to a Vec<u8> that is suitable to
-    /// use with C function
-    /// Source: https://github.com/GuillaumeGomez/sysinfo/blob/master/src/utils.rs#L8
-    fn to_cpath(&self, path: &Path) -> Vec<u8> {
-        use std::{ffi::OsStr, os::unix::ffi::OsStrExt};
-
-        let path_os: &OsStr = path.as_ref();
-        let mut cpath = path_os.as_bytes().to_vec();
-        cpath.push(0);
-        cpath
+        Ok(directory_size)
     }
 
 }

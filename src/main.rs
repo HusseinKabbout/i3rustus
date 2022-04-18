@@ -13,7 +13,7 @@ use widgets::{ Widget };
 use log::{ LevelFilter };
 use widgets::memory_stats::MemoryUsage;
 
-static LOGGER: Logger = Logger;
+static LOGGER: Logger = Logger { log_file: "/var/log/i3rustus.log" };
 
 struct I3Config {
     version: u8,
@@ -38,12 +38,11 @@ impl I3Config {
                 Ok(conf) => widget_config = conf,
                 Err(error) => {
                     LOGGER.warning(
-                        &format!(
+                        format!(
                             "Invalid config for {}: \n\tTried to convert `{}` to JSON\n\t{}",
                             widget.name(),
                             widget.to_json(),
-                            error),
-                        &file!());
+                            error));
                     continue
                 }
             }

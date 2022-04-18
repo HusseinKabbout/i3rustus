@@ -7,11 +7,11 @@ use crate::widgets::Widget;
 use crate::widgets::WidgetError;
 
 /// A struct that holds a Map of all paths that we want to watch over
-pub struct Disk<'a> {
-    pub paths_to_watch: HashMap<&'a str, &'a str>
+pub struct Disk {
+    pub paths_to_watch: HashMap<String, String>
 }
 
-impl<'a> Disk<'a> {
+impl<'a> Disk {
 
     fn calulcate_available_disk_storage(&self, path: &Path) -> Result<u64, Error> {
         let mut directory_size = 0;
@@ -33,7 +33,7 @@ impl<'a> Disk<'a> {
 
 }
 
-impl<'a> Widget for Disk<'a> {
+impl<'a> Widget for Disk {
 
     fn name(&self) -> &str {
         "disk"

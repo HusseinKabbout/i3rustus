@@ -82,7 +82,7 @@ fn main() {
             Box::new(MemoryUsage {}),
             Box::new(Disk {
                 paths_to_watch: HashMap::from([
-                    ("root", "/")
+                    (String::from("root"), String::from("/"))
                 ])
             }),
             Box::new(Time {})

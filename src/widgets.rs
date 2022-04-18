@@ -17,18 +17,20 @@ pub trait Widget {
         // full_text is defined by i3 and is the display_text
         // Name is not defined by i3 and is only used to know which
         // config belongs to which widget
-        let text = self.display_text();
+        let mut full_text = String::new();
 
-        match text {
-            Ok(text) => format!(
-                "{{ \"full_text\": \"{}\", \"name\": \"{}\" }}",
-                // unwrap should be safe to use here, because we check
-                // wether text is OK or not first
-                text,
-                self.name()
-            ),
-            Err(error) => String::from(error.error_message)
+        match self.display_text() {
+            Ok(text) => full_text = text,
+            Err(error) => full_text = String::from(error.error_message)
         }
+
+        format!(
+            "{{ \"full_text\": \"{}\", \"name\": \"{}\" }}",
+            // unwrap should be safe to use here, because we check
+            // wether text is OK or not first
+            full_text,
+            self.name()
+        )
     }
 
 }

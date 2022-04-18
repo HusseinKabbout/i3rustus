@@ -2,6 +2,7 @@ use chrono::Utc;
 use chrono::DateTime;
 
 use crate::widgets::Widget;
+use crate::widgets::WidgetError;
 
 // Why does this "#[derive(Copy, Clone)]" not fix the error:
 // error[E0507]: cannot move out of `**widget` which is behind a shared reference
@@ -17,9 +18,9 @@ impl Widget for Time {
         "time"
     }
 
-    fn display_text(&self) -> String {
+    fn display_text(&self) -> Result<String, WidgetError> {
         let current_time: DateTime<Utc> = Utc::now();
-        format!("{}", current_time.format("%d.%m.%Y %H:%M:%S"))
+        Ok(format!("{}", current_time.format("%d.%m.%Y %H:%M:%S")))
     }
 
 }

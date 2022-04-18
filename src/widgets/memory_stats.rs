@@ -6,6 +6,7 @@ use std::io::BufReader;
 use std::num::ParseFloatError;
 
 use crate::widgets::Widget;
+use crate::widgets::WidgetError;
 
 #[derive(Debug)]
 struct MemoryInfromation {
@@ -107,19 +108,18 @@ impl Widget for MemoryUsage {
         "memory"
     }
 
-    fn display_text(&self) -> String {
-        let usage: Option<MemoryInfromation> = self.get_usage().ok();
+    fn display_text(&self) -> Result<String, WidgetError> {
 
-        match usage {
-            Some(usage) => format!(
-                "RAM (GiB): U={used:.1} A={available:.1} / {total_usable:.1}",
-                used = usage.used / 1024.0 / 1024.0,
-                available = usage.available / 1024.0 / 1024.0,
-                total_usable = usage.total_usable / 1024.0 / 1024.0
+        match self.get_usage() {
+            Ok(usage) => Ok(
+                format!(
+                    "RAM (GiB): U={used:.1} A={available:.1} / {total_usable:.1}",
+                    used = usage.used / 1024.0 / 1024.0,
+                    available = usage.available / 1024.0 / 1024.0,
+                    total_usable = usage.total_usable / 1024.0 / 1024.0
+                )
             ),
-            None => format!("ParsingError")
-
+            Err(msg) => return Err(WidgetError { error_message: msg.to_string() } )
         }
     }
-
 }

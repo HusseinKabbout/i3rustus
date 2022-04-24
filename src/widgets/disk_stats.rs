@@ -1,8 +1,13 @@
-use std::fs;
 use std::collections::HashMap;
+use std::ffi::CString;
 use std::io::Error;
+use std::mem;
 use std::path::Path;
 
+use libc::statvfs;
+
+use crate::LOGGER;
+use crate::utils::macros::cast_to_u64;
 use crate::widgets::Widget;
 use crate::widgets::WidgetError;
 
@@ -13,22 +18,22 @@ pub struct Disk {
 
 impl<'a> Disk {
 
-    fn calulcate_available_disk_storage(&self, path: &Path) -> Result<u64, Error> {
+    fn calulcate_available_disk_storage(&self, path: &Path) -> Result<f64, Error> {
         let mut directory_size = 0;
 
-        if path.is_dir() {
-            for directory_entry in fs::read_dir(path)? {
-                let directory_entry_path = directory_entry?.path();
-                directory_size += directory_entry_path.metadata()?.len();
-                if directory_entry_path.is_dir() {
-                    directory_size += self.calulcate_available_disk_storage(&directory_entry_path)?;
-                }
+        unsafe {
+            let mut stat: statvfs = mem::zeroed();
+            let path_in_c = CString::new(path.to_string_lossy().as_bytes())?;
+            // Look at the statvfs implementation to understand why it is way faster than to
+            // calculate the value ourselfs
+            if statvfs(path_in_c.as_ptr() as *const _, &mut stat) == 0 {
+                let tmp = cast_to_u64!(stat.f_bsize) * cast_to_u64!(stat.f_bavail);
+                directory_size = cast_to_u64!(tmp);
             }
-        } else {
-            directory_size = path.metadata()?.len();
+
+            Ok(directory_size as f64/ 1024.0 / 1024.0 / 1024.0)
         }
 
-        Ok(directory_size)
     }
 
 }
@@ -56,7 +61,10 @@ impl<'a> Widget for Disk {
                     output.push_str(&calculated_storage.to_string());
                     output.push_str(" GiB");
                 },
-                Err(msg) => return Err(WidgetError { error_message: msg.to_string() } )
+                Err(msg) => {
+                    LOGGER.error(msg.to_string());
+                    return Err(WidgetError { error_message: msg.to_string() } )
+                }
             }
         }
         Ok(output)

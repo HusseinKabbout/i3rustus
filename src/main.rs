@@ -84,9 +84,7 @@ fn main() {
         widgets: vec![
             Box::new(MemoryUsage {}),
             Box::new(Disk {
-                paths_to_watch: HashMap::from([
-                    (String::from("root"), String::from("/"))
-                ])
+                path_to_watch: (String::from("root"), String::from("/"))
             }),
             Box::new(Time {})
         ]

@@ -1,4 +1,3 @@
-use std::collections::HashMap;
 use std::ffi::CString;
 use std::io::Error;
 use std::mem;
@@ -13,7 +12,7 @@ use crate::widgets::WidgetError;
 
 /// A struct that holds a Map of all paths that we want to watch over
 pub struct Disk {
-    pub paths_to_watch: HashMap<String, String>
+    pub path_to_watch: (String, String)
 }
 
 impl<'a> Disk {
@@ -45,28 +44,20 @@ impl<'a> Widget for Disk {
     }
 
     fn display_text(&self) -> Result<String, WidgetError> {
-        let mut output: String = String::new();
-        // We create a iterator from the vector and consume it directly in the for loop
-        for (name, path) in &self.paths_to_watch {
+        // We need to borrow here because "String" does not implement the copy trait
+        // and self is already borrowed. That means that we cannot move the "path_to_watch" variable
+        // out of the shared reference because we don't own the reference.
+        let (name, path) = &self.path_to_watch;
 
-            // Add comma to differentiate between multiple paths
-            if output != "" {
-                output.push_str(", ");
-            }
-
-            match self.calulcate_available_disk_storage(&Path::new(path)) {
-                Ok(calculated_storage) => {
-                    output.push_str(name);
-                    output.push_str(": ");
-                    output.push_str(&calculated_storage.to_string());
-                    output.push_str(" GiB");
-                },
-                Err(msg) => {
-                    LOGGER.error(msg.to_string());
-                    return Err(WidgetError { error_message: msg.to_string() } )
-                }
+        match self.calulcate_available_disk_storage(&Path::new(path)) {
+            Ok(calculated_storage) => Ok(
+                format!("{name}: {calculated_storage:.1} GiB")
+            ),
+            Err(msg) => {
+                LOGGER.error(msg.to_string());
+                return Err(WidgetError { error_message: msg.to_string() } )
             }
         }
-        Ok(output)
+
     }
 }
